@@ -1,8 +1,7 @@
 # may be a s1 success classifier
 from .classifier import Classifier
 
-class C_1_success(Classifier):
-
+class S1_Success(Classifier):
     def __init__(self):
         self.classified = False
         self.nextState = self.INTRODUCTION

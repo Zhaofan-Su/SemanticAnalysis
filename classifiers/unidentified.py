@@ -1,9 +1,7 @@
 # may be a unidentified classifier
 from .classifier import Classifier
-from configparser import ConfigParser
 
-class C_unidentified(Classifier):
-
+class Unidentified(Classifier):
     def __init__(self):
         self.times = 0
         self.classified = True
@@ -18,7 +16,7 @@ class C_unidentified(Classifier):
                 return True, "end", "unidentified"
         return True, "unidentified", "once"
 
-    def doClassification(self,sentence):
+    def do_classification(self, sentence):
         for word in self.wordsList:
             if word in sentence:
                 self.classified = True

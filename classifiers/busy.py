@@ -18,4 +18,3 @@ class C_busy(Classifier):
     def get_intention(self):
         self.classified = False
         return True, "end", "busy"
-

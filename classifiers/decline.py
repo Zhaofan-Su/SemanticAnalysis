@@ -1,8 +1,7 @@
 # may be a repetition classifier
 from .classifier import Classifier
 
-class C_decline(Classifier):
-
+class Decline(Classifier):
     def __init__(self):
         self.classified = False
         self.nextState = self.END

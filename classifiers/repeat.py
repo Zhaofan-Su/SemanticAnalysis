@@ -2,8 +2,7 @@
 from .classifier import Classifier
 
 
-class C_repeat(Classifier):
-
+class Repeat(Classifier):
     def __init__(self):
         self.classified = False
         self.wordsList = ['再说一下',

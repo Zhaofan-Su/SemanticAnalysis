@@ -19,7 +19,7 @@ class Classifier:
     def get_intention(self):
         raise NotImplementedError
 
-    def doClassification(self,sentence):
+    def do_classification(self, sentence):
         for word in self.wordsList:
             if word in sentence:
                 self.classified = True
