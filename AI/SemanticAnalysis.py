@@ -1,4 +1,15 @@
 from configparser import ConfigParser
+
+from AI.Classifiers.S1_success import S1Success
+from AI.Classifiers.S2_success import S2Success
+from AI.Classifiers.busy import Busy
+from AI.Classifiers.repeat import Repeat
+from AI.Classifiers.chatting import Chatting
+from AI.Classifiers.query import Query
+from AI.Classifiers.decline import Decline
+from AI.Classifiers.unidentified import Unidentified
+
+from .EmotionAnalysis import EmotionAnalysis
 from .TextSpeech import text_to_speech
 from .Classifiers import *
 import os.path as path
@@ -20,9 +31,9 @@ class SemanticAnalysis:
         self.c_query = Query(config)
         self.c_unidentified = Unidentified()
         self.c_chat = Chatting()
-        self.c_decline = Decline()
+        self.c_decline = Decline(config)
         self.c_repeat = Repeat()
-        self.c_busy = Busy()
+        self.c_busy = Busy(config)
 
         # basic config
         self.READ_RESPONSE = config.READ_RESPONSE
@@ -30,30 +41,45 @@ class SemanticAnalysis:
         introduction = self._response_from_config("welcome", "prologue")
         self._output_response(introduction)
 
+        # emotion analysis
+        self.emotion_recognition = config.EMOTION_RECOGNItION
+        self.voice_input = config.INPUT == "voice"
+        self.emotion = EmotionAnalysis(config) if config.EMOTION_RECOGNItION else None
+
+
     def _output_response(self, response):
         print("客服: " + response)
         if self.READ_RESPONSE:
             text_to_speech(response)
 
+    def _get_emotion(self):
+        self.emotion.analysis()
+
     def get_response(self, sentence):
+        if self.voice_input and self.emotion_recognition:
+            self._get_emotion()
+
         classifiers = []
         if self.state == SemanticAnalysis.INITIAL:
             classifiers.append(self.c_query)
             classifiers.append(S1Success())
             classifiers.append(self.c_chat)
             classifiers.append(self.c_repeat)
+            classifiers.append(self.c_busy)
             classifiers.append(self.c_decline)
             classifiers.append(self.c_unidentified)
         elif self.state == SemanticAnalysis.QUERIED:
             classifiers.append(S1Success())
             classifiers.append(self.c_chat)
             classifiers.append(self.c_repeat)
+            classifiers.append(self.c_busy)
             classifiers.append(self.c_decline)
             classifiers.append(self.c_unidentified)
         elif self.state == SemanticAnalysis.INTRODUCTION:
             classifiers.append(S2Success())
             classifiers.append(self.c_chat)
             classifiers.append(self.c_repeat)
+            classifiers.append(self.c_busy)
             classifiers.append(self.c_decline)
             classifiers.append(self.c_unidentified)
 
@@ -63,7 +89,6 @@ class SemanticAnalysis:
         for classifier in classifiers:
             # do classification...
             next_state = classifier.do_classification(sentence)
-
             if classifier.is_classified():
                 cfg_needed, intention, sub_intention = classifier.get_intention()
 
